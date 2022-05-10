@@ -1,32 +1,38 @@
 const { Router } = require("express"); 
+const { create, update, get, destroy } = require("../mvc/controller/user");
 const router = Router();  //Enables to create separate routes
 
-router.get("/:id", (req, res) => {    
+router.get("/:id?", async (req, res) => {    
     const { id } = req.params; 
-    console.log(id); 
 
-    res.send("GET User");
+    const user = await get(id);  
+
+    res.send(user);
 }); 
 
-router.post("/:id", (req, res) => {
-    const { id } = req.params; 
-    console.log(id);  
+router.post("/", async (req, res) => {
+    const {name, email, password} = req.body;     
+    
+    const user = await create(name, email, password); 
 
-    res.send("POST User"); 
+    res.send(user); 
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
+    const {name, password} = req.body; 
     const { id } = req.params; 
-    console.log(id);  
 
-    res.send("PUT User")
+    const user = await update(id, name, password);  
+
+    res.send(user); 
 }); 
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", async (req, res) => {
     const { id } = req.params; 
-    console.log(id);  
+    
+    const user = await destroy(id); 
 
-    res.send("DELETE User");
+    res.send("User deleted successfully");
 }); 
 
 module.exports = router; //Loads the router so that it can be used 
