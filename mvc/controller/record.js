@@ -14,7 +14,7 @@ const create = async ({userId, heading, description, checklists}) => {
             {
                 transaction: transaction
         });
-            
+        
         if(checklists && checklists.length > 0) {
             for (const item of checklists) {
                 await checklist.create({
@@ -30,7 +30,7 @@ const create = async ({userId, heading, description, checklists}) => {
 
         await transaction.commit();
 
-        return await get(newRecord.id); 
+        return await get(userId, newRecord.id); 
     } catch (error) {
         await transaction.rollback();  
         
@@ -39,7 +39,7 @@ const create = async ({userId, heading, description, checklists}) => {
 }
 
 
-const get = async (id = null, transaction = null) => {
+const get = async (userId, id = null, transaction = null) => {
     let result; 
     let include = [{
         model: user, 
@@ -52,12 +52,16 @@ const get = async (id = null, transaction = null) => {
 
     if(id) {
         result = record.findOne({
-            where: {id},
+            where: {id, usuarioId: userId},
             include,
             transaction
         });         
     } else {
-        result = await record.findAll({include, transaction});                 
+        result = await record.findAll({
+            where: {usuarioId: userId},
+            include,
+            transaction
+        });                 
     }
 
     return result; 

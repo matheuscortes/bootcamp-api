@@ -1,6 +1,7 @@
 const { user } = require('../../database'); 
 const jwt = require('jsonwebtoken'); 
 const { secret } = require('../../config/security.json'); 
+const bcrypt = require('bcrypt'); 
 
 const create = async (name, email, password) => {
     let [created]  = await user.findOrCreate({
@@ -33,8 +34,8 @@ const update = async (id, name, password) => {
     return await get(id); 
 };
 
-const get = async (id = null) => {
-    const result = id ? await user.findByPk(id) : await user.findAll(); 
+const get = async (id) => {
+    const result = await user.findByPk(id); 
 
     return result; 
 }
@@ -49,13 +50,15 @@ const destroy = async(id) => {
 
 const login = async (email, password) => {
     try {
-        const client = await user.findOne({
+        const client = await user.scope("login").findOne({
             where: {
                 email: email
             }
         });
+       
+        const correctPassword = await bcrypt.compare(password, client.senha);         
 
-        if(!client || password !== client.senha) {
+        if(!correctPassword) {
             return false; 
         }
 

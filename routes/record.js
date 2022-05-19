@@ -1,12 +1,21 @@
 const { Router } = require("express"); 
 const router = Router(); 
+const { check, validationResult } = require("express-validator"); 
 const { create, get, destroy, update } = require("../mvc/controller/record"); 
 
-router.get("/:id?", async(req, res) => {
+router.get("/:id?", check("id").optional().isInt().withMessage("ID must be an Integer value"), async(req, res) => {
     try {
-        const { id } = req.params; 
+    
+        const errors = validationResult(req); 
+
+        if(!errors.isEmpty()) {
+            return res.status(400).send({message: errors.array()}); 
+        }
         
-        const record = await get(id); 
+        const { id } = req.params; 
+        const { userId } = req; 
+        
+        const record = await get(userId, id); 
 
         if(!record) {
             return res.send("Record not found");
@@ -18,13 +27,20 @@ router.get("/:id?", async(req, res) => {
     }
 }); 
 
-router.post("/", async (req, res) => {
+router.post("/", check('checklists').isArray().withMessage("Checklists must be an array"), async (req, res) => {
     try {
-        const { body } = req; 
+
+        const errors = validationResult(req);
+        
+        if(!errors.isEmpty()) {
+            return res.status(400).send({message: errors}); 
+        }
+
+        const { body } = req;       
     
-        const record = await create(body); 
+        const record = await create(body);  
     
-        res.send(record);         
+        res.send(record, );         
     } catch (error) {
         res.status(500).send({message: error.message});         
     }

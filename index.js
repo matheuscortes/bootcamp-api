@@ -4,8 +4,10 @@ const user = require('./routes/user'); //Loads the file so that it can be access
 const record = require('./routes/record'); 
 const login = require('./routes/login'); 
 const authorization = require('./middlewares/authorization'); 
+const morgan = require('morgan'); 
 
 app.use(express.json()); 
+app.use(morgan("dev")); 
 
 app.get("/", (req, res) => {
     const person = {name: 'Matheus', lastName: 'Cortes'};
